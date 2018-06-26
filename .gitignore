@@ -4,3 +4,6 @@ dist
 
 .tmp
 app.yaml
+.idea
+
+.DS_Store

@@ -77,5 +77,7 @@
   svg.attr('width', '600px').attr('height', '300px');
   var y = d3.scaleLinear().domain([15, 90]).range([250, 0]);
   var x = d3.scaleLinear().domain([200, 15000]).range([0, 600]);
-  alert(y(52.5));
+  var r = d3.scaleSqrt().domain([52070, 1.38e+9]).range([10, 40]);
+
+  svg.append('circle').attr('fill', 'red').attr('cy', y(77)).attr('cx', x(13000)).attr('r', r(1.38e+9));
 })();
