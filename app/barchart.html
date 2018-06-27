@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="scripts/lib/d3.js"></script>
+</head>
+<body>
+
+<svg width="960" height="500" id="barchart"></svg>
+<svg width="960" height="500" id="barChartHorizontal"></svg>
+<style>
+  .bar:hover {
+    fill: #6495ed;
+  }
+</style>
+<script>
+  (function () {
+    var svg = d3.select('#barchart'),
+      margin = {top: 50, right: 20, bottom: 30, left: 40},
+      width = +svg.attr('width') - margin.right - margin.left,
+      height = +svg.attr('height') - margin.top - margin.bottom;
+    var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+      y = d3.scaleLinear().rangeRound([height, 0]);
+    var g = svg.append('g').attr('transform', "translate(" + margin.left + "," + margin.top + ")");
+
+
+    function draw(data) {
+      x.domain(data.map(function (d) {
+        return d.letter
+      }));
+      y.domain([0, d3.max(data, function (d) {
+        return d.frequency
+      })]);
+
+      svg.append('text')
+        .attr('y', 30)
+        .attr('x', width / 2)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '24px')
+        .text('the relative frequency of letters in the English language');
+
+      g.append('g').attr("class", "axis axis--x")
+        .attr('transform', 'translate(0, ' + height + ")")
+        .call(d3.axisBottom(x))
+        .append('text')
+        .attr('y', 20)
+        .attr('x', width)
+        .attr('dy', '0.71em')
+        .attr('text-anchor', 'end')
+        .attr('fill', 'black')
+        .attr('font-size', 14)
+        .text('Letters');
+
+      g.append('g').attr("class", "axis axis--y")
+        .call(d3.axisLeft(y).ticks(10, "%"))
+        .append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 6)
+        .attr('dy', '0.71em')
+        .attr('text-anchor', 'end')
+        .attr('fill', 'black')
+        .text('Frequency');
+
+      g.selectAll('.bar').data(data).enter().append("rect").attr("class", "bar")
+        .attr('x', function (d) {
+          return x(d.letter);
+        })
+        .attr('y', function (d) {
+          return y(d.frequency);
+        })
+        .attr('fill', '#d25')
+        .attr('width', x.bandwidth())
+        .attr('height', function (d) {
+          return height - y(d.frequency)
+        });
+    }
+
+    d3.tsv("data.tsv", function (d) {
+      d.frequency = +d.frequency;
+      return d;
+    }).then(function (data) {
+      draw(data);
+    });
+  })();
+
+
+  (function () {
+    var svg = d3.select('#barChartHorizontal'),
+      margin = {top: 50, right: 20, bottom: 40, left: 40},
+      width = +svg.attr('width') - margin.left - margin.right,
+      height = +svg.attr('height') - margin.top - margin.bottom;
+
+    var x = d3.scaleLinear().rangeRound([0, width]),
+      y = d3.scaleBand().rangeRound([height, 0]).padding(0.2),
+      g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    function draw(data) {
+      x.domain([0, d3.max(data, function(d) { return d.frequency })]);
+      y.domain(data.map(function(d) {
+        return d.letter;
+      }));
+
+      g.append('g')
+        .call(d3.axisLeft(y));
+
+      g.append('g')
+        .call(d3.axisBottom(x))
+        .attr('transform', 'translate(0, ' + height + ')');
+
+      g.selectAll('.bar').data(data).enter().append('rect').attr('class', 'bar')
+        .attr('x', 0)
+        .attr('y', function(d) {
+          return y(d.letter);
+        })
+        .attr('width', function(d) {
+          return x(d.frequency);
+        })
+        .attr('height', y.bandwidth())
+        .attr('fill', '#d25')
+    }
+
+    d3.tsv("data.tsv", function (d) {
+      d.frequency = +d.frequency;
+      return d;
+    }).then(function (data) {
+      draw(data);
+    });
+  })();
+</script>
+
+</body>
+</html>
